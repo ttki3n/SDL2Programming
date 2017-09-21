@@ -1,3 +1,14 @@
+## Ignore all temporary/generated files of VS
+prj/*
+!*.sln
+!*.vcxproj
+!*.filters
+!*.cd
+!props
+
+
+## Ignore abcxyz
+
 # Prerequisites
 *.d
 
