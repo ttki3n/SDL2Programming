@@ -1,43 +1,15 @@
 ## Ignore all temporary/generated files of VS
 prj/*
-!*.sln
-!*.vcxproj
-!*.filters
-!*.cd
-!props
+!prj/*.sln
+!prj/*.vcxproj
+!prj/*.filters
+!prj/*.cd
+!prj/props
+
+build/*
+!build/Win32/SDL2.dll
+!build/x64/SDL2.dll
+
 
 
 ## Ignore abcxyz
-
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
