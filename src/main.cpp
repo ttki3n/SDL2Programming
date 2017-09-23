@@ -13,6 +13,8 @@ void Close();
 SDL_Window *gWindow = nullptr;
 SDL_Surface *gScreenSurface = nullptr;
 SDL_Surface *gHelloWorld = nullptr;
+SDL_Event e;
+bool quit = false;
 
 bool Init()
 {
@@ -71,15 +73,69 @@ int main(int argc, char* args[])
 	{
 		return false;
 	}
+	int posX, posY, width, height;
+	posX = posY = 0;
+	//posX = gHelloWorld->w;
+	width = gHelloWorld->clip_rect.w;
+	height = gHelloWorld->clip_rect.h;
+	while (!quit)
+	{
+		// Handle events on queue
+		while (SDL_PollEvent(&e) != 0)
+		{
+			// Check if user requested quit
+			if (e.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+			else if (e.type == SDL_KEYDOWN)
+			{
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_UP:
+				{
+					posY--;
+					break;
+				}
 
-	// Apply the image
-	SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
-	// Update the surface
-	SDL_UpdateWindowSurface(gWindow);
+				case SDLK_DOWN:
+				{
+					posY++;
+					break;
+				}
 
-	// Wait 2 seconds before exiting
-	SDL_Delay(2000);
-	
+				case SDLK_LEFT:
+				{
+					posX--;
+					break;
+				}
+
+				case SDLK_RIGHT:
+				{
+					posX++;
+					break;
+				}
+				
+				default:
+				{
+					break;
+				}
+
+				}
+			}
+
+			
+
+		}
+
+		SDL_Rect tmp = { posX, posY, width, height };
+		// Apply the image
+		SDL_FillRect(gScreenSurface, NULL, 0x000000);
+		SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, &tmp);
+		// Update the surface
+		SDL_UpdateWindowSurface(gWindow);		
+	}
+
 	LOG_INFO("End session");
 
 	return 0;
