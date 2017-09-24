@@ -9,12 +9,14 @@ const int SCREEN_HEIGHT = 768;
 bool Init();
 bool LoadMedia();
 void Close();
+SDL_Surface* LoadSurface(std::string path);
 
 SDL_Window *gWindow = nullptr;
 SDL_Surface *gScreenSurface = nullptr;
 SDL_Surface *gHelloWorld = nullptr;
 SDL_Event e;
 bool quit = false;
+
 
 bool Init()
 {
@@ -39,7 +41,7 @@ bool Init()
 
 bool LoadMedia()
 {
-	gHelloWorld = SDL_LoadBMP("data/flower.bmp");
+	gHelloWorld = LoadSurface("data/flower.bmp");
 	if (!gHelloWorld)
 	{
 		LOG_ERROR("Could not load media! SDL error: %s\n", SDL_GetError());
@@ -47,6 +49,31 @@ bool LoadMedia()
 	}
 
 	return true;
+}
+
+SDL_Surface* LoadSurface(std::string path)
+{
+	SDL_Surface* optimizedSurface = nullptr;
+
+	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+	if (loadedSurface == nullptr)
+	{
+		LOG_ERROR("Unable to load image %s! SDL error: %s", path.c_str(), SDL_GetError());
+		return nullptr;
+	}
+
+
+	optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, NULL);
+	if (optimizedSurface == nullptr)
+	{
+		LOG_ERROR("Unable to optimize image %s! SDL error: %s", path.c_str(), SDL_GetError());
+	}
+	
+	// SDL_ConvertSurface will return a new copy of the original surface,
+	// so must free the original surface in any case of converting.
+	SDL_FreeSurface(loadedSurface);
+
+	return optimizedSurface;
 }
 
 void Close()
@@ -73,11 +100,16 @@ int main(int argc, char* args[])
 	{
 		return false;
 	}
-	int posX, posY, width, height;
-	posX = posY = 0;
-	//posX = gHelloWorld->w;
+
+	int posX, posY, width, height;	
+	
 	width = gHelloWorld->clip_rect.w;
 	height = gHelloWorld->clip_rect.h;
+	posX = (SCREEN_WIDTH - width) / 2;
+	posY = (SCREEN_HEIGHT - height) / 2;
+
+	SDL_Rect stretchedRect = { 0, 0, width/4, height/4 };
+
 	while (!quit)
 	{
 		// Handle events on queue
@@ -131,7 +163,9 @@ int main(int argc, char* args[])
 		SDL_Rect tmp = { posX, posY, width, height };
 		// Apply the image
 		SDL_FillRect(gScreenSurface, NULL, 0x000000);
+		SDL_BlitScaled(gHelloWorld, NULL, gScreenSurface, &stretchedRect);
 		SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, &tmp);
+		
 		// Update the surface
 		SDL_UpdateWindowSurface(gWindow);		
 	}
