@@ -7,8 +7,8 @@ prj/*
 !prj/props
 
 build/*
-!build/Win32/SDL2.dll
-!build/x64/SDL2.dll
+#!build/Win32/SDL2.dll
+#!build/x64/SDL2.dll
 
 
 

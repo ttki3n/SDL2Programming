@@ -1,0 +1,9 @@
+@echo off
+
+SET PRJ_PATH=%~dp0
+
+SET BUILD_PATH_WIN32=%PRJ_PATH%build\win32\
+SET BUILD_PATH_X64=%PRJ_PATH%build\x64\
+
+SET LIBS_PATH=%PRJ_PATH%libs\
+
