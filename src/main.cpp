@@ -10,11 +10,11 @@ const int SCREEN_HEIGHT = 768;
 bool Init();
 bool LoadMedia();
 void Close();
-SDL_Surface* LoadSurface(std::string path);
+SDL_Texture* LoadTexture(std::string path);
 
 SDL_Window *gWindow = nullptr;
-SDL_Surface *gScreenSurface = nullptr;
-SDL_Surface *gHelloWorld = nullptr;
+SDL_Renderer* gRenderer = nullptr;
+SDL_Texture* gTexture = nullptr;
 SDL_Event e;
 bool quit = false;
 
@@ -24,77 +24,91 @@ bool Init()
 	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		LOG_ERROR("SDL could not be initialized! SDL error: %s\n", SDL_GetError());
+		LOG_ERROR("SDL could not be initialized! SDL error: %s", SDL_GetError());
 		return false;
 	}
 
 	gWindow = SDL_CreateWindow("SDL2 Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (!gWindow)
 	{
-		LOG_ERROR("Window could not be created! SDL error: %s\n", SDL_GetError());
+		LOG_ERROR("Window could not be created! SDL error: %s", SDL_GetError());
 		return false;
 	}	
+	
+	gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+	if (!gRenderer)
+	{
+		LOG_ERROR("Renderer could not be created! SDL error: %s", SDL_GetError());
+		return false;
+	}
 
-	// Load SDL2 Image extension
+	// Initialize renderer color
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+	// Initialize SDL2 Image extension
 	int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
 	int result = IMG_Init(imgFlags);
 	if ((result & imgFlags) != imgFlags) 
 	{
-		LOG_ERROR("SDL_image could not be initialized! SDL_image error: %s\n", IMG_GetError());
+		LOG_ERROR("SDL_image could not be initialized! SDL_image error: %s", IMG_GetError());
 		return false;
 	}
 
-	gScreenSurface = SDL_GetWindowSurface(gWindow);
+	
 
 	return true;
 }
 
 bool LoadMedia()
 {
-	//gHelloWorld = LoadSurface("data/flower.bmp");
-	gHelloWorld = LoadSurface("data/egg.jpg");
-	if (!gHelloWorld)
+	
+	//gTexture = LoadTexture("data/flower.bmp");
+	gTexture = LoadTexture("data/egg.jpg");
+	if (!gTexture)
 	{
-		LOG_ERROR("Could not load media! SDL error: %s\n", SDL_GetError());
+		LOG_ERROR("Could not load media! SDL error: %s", SDL_GetError());
 		return false;
 	}
 
 	return true;
 }
 
-SDL_Surface* LoadSurface(std::string path)
+SDL_Texture* LoadTexture(std::string path)
 {
-	SDL_Surface* optimizedSurface = nullptr;
-
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == nullptr)
+	SDL_Texture *newTexture = nullptr;
+	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
+	if (!loadedSurface)
 	{
-		LOG_ERROR("Unable to load image %s! SDL_image error: %s", path.c_str(), IMG_GetError());
+		LOG_ERROR("Unalbe to load image %s! SDL_Image error: %s", path.c_str(), IMG_GetError());
 		return nullptr;
 	}
 
-
-	optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, NULL);
-	if (optimizedSurface == nullptr)
+	// Create texture from surface pixels
+	newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+	if (newTexture == nullptr)
 	{
-		LOG_ERROR("Unable to optimize image %s! SDL error: %s", path.c_str(), SDL_GetError());
+		LOG_ERROR("Unalbe to create texture from %s! SDL error: %s", path.c_str(), IMG_GetError());
 	}
-	
-	// SDL_ConvertSurface will return a new copy of the original surface,
-	// so must free the original surface in any case of converting.
+
+	// Get rid of old loaded surface
 	SDL_FreeSurface(loadedSurface);
 
-	return optimizedSurface;
+	return newTexture;
 }
 
 void Close()
 {
-	SDL_FreeSurface(gHelloWorld);
-	gHelloWorld = nullptr;
+	SDL_DestroyTexture(gTexture);
+	gTexture = nullptr;
+
+	SDL_DestroyRenderer(gRenderer);
+	gRenderer = nullptr;
 
 	SDL_DestroyWindow(gWindow);
 	gWindow = nullptr;
 
+	// Quit SDL subsystems
+	IMG_Quit();
 	SDL_Quit();
 }
 
@@ -114,8 +128,7 @@ int main(int argc, char* args[])
 
 	int posX, posY, width, height;	
 	
-	width = gHelloWorld->clip_rect.w;
-	height = gHelloWorld->clip_rect.h;
+	SDL_QueryTexture(gTexture, NULL, NULL, &width, &height);
 	posX = (SCREEN_WIDTH - width) / 2;
 	posY = (SCREEN_HEIGHT - height) / 2;
 
@@ -172,13 +185,15 @@ int main(int argc, char* args[])
 		}
 
 		SDL_Rect tmp = { posX, posY, width, height };
-		// Apply the image
-		SDL_FillRect(gScreenSurface, NULL, 0x000000);
-		SDL_BlitScaled(gHelloWorld, NULL, gScreenSurface, &stretchedRect);
-		SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, &tmp);
 		
-		// Update the surface
-		SDL_UpdateWindowSurface(gWindow);		
+		// Clear screen
+		SDL_RenderClear(gRenderer);
+
+		// Render texture to screen
+		SDL_RenderCopy(gRenderer, gTexture, NULL, &tmp);
+
+		// Update screen
+		SDL_RenderPresent(gRenderer);
 	}
 
 	LOG_INFO("End session");
