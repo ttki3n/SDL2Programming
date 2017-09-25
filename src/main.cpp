@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_Image.h>
 #include <stdio.h>
 
 #include "Utils/Logger.h"
@@ -32,6 +33,15 @@ bool Init()
 	{
 		LOG_ERROR("Window could not be created! SDL error: %s\n", SDL_GetError());
 		return false;
+	}	
+
+	// Load SDL2 Image extension
+	int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+	int result = IMG_Init(imgFlags);
+	if ((result & imgFlags) != imgFlags) 
+	{
+		LOG_ERROR("SDL_image could not be initialized! SDL_image error: %s\n", IMG_GetError());
+		return false;
 	}
 
 	gScreenSurface = SDL_GetWindowSurface(gWindow);
@@ -41,7 +51,8 @@ bool Init()
 
 bool LoadMedia()
 {
-	gHelloWorld = LoadSurface("data/flower.bmp");
+	//gHelloWorld = LoadSurface("data/flower.bmp");
+	gHelloWorld = LoadSurface("data/egg.jpg");
 	if (!gHelloWorld)
 	{
 		LOG_ERROR("Could not load media! SDL error: %s\n", SDL_GetError());
@@ -55,10 +66,10 @@ SDL_Surface* LoadSurface(std::string path)
 {
 	SDL_Surface* optimizedSurface = nullptr;
 
-	SDL_Surface* loadedSurface = SDL_LoadBMP(path.c_str());
+	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
 	if (loadedSurface == nullptr)
 	{
-		LOG_ERROR("Unable to load image %s! SDL error: %s", path.c_str(), SDL_GetError());
+		LOG_ERROR("Unable to load image %s! SDL_image error: %s", path.c_str(), IMG_GetError());
 		return nullptr;
 	}
 
