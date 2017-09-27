@@ -129,8 +129,8 @@ int main(int argc, char* args[])
 	int posX, posY, width, height;	
 	
 	SDL_QueryTexture(gTexture, NULL, NULL, &width, &height);
-	posX = (SCREEN_WIDTH - width) / 2;
-	posY = (SCREEN_HEIGHT - height) / 2;
+	posX = 0; //(SCREEN_WIDTH - width) / 2;
+	posY = 0; //(SCREEN_HEIGHT - height) / 2;
 
 	SDL_Rect stretchedRect = { 0, 0, width/4, height/4 };
 
@@ -187,10 +187,32 @@ int main(int argc, char* args[])
 		SDL_Rect tmp = { posX, posY, width, height };
 		
 		// Clear screen
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gRenderer);
 
 		// Render texture to screen
 		SDL_RenderCopy(gRenderer, gTexture, NULL, &tmp);
+
+		// Render red filled quad
+		SDL_Rect fillRect = {SCREEN_WIDTH * 7/16, SCREEN_HEIGHT * 7/16, SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8};
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
+		SDL_RenderFillRect(gRenderer, &fillRect);
+
+		// Render green outlineed quad
+		SDL_Rect outlineRect = {SCREEN_WIDTH * 3/8, SCREEN_HEIGHT * 3/8, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4};
+		SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
+		SDL_RenderDrawRect(gRenderer, &outlineRect);
+
+		// Draw blue horizontal line
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0xFF, 0xFF);
+		SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+
+		// Draw vertical line of yellow dots
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
+		for (int i = 0; i < SCREEN_HEIGHT; i += 4)
+		{ 
+			SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
+		}
 
 		// Update screen
 		SDL_RenderPresent(gRenderer);
