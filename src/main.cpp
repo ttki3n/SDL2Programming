@@ -11,10 +11,12 @@ bool Init();
 bool LoadMedia();
 void Close();
 SDL_Texture* LoadTexture(std::string path);
+void DrawPrimitives();
 
 SDL_Window *gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
-SDL_Texture* gTexture = nullptr;
+SDL_Texture* gTexture1 = nullptr;
+SDL_Texture* gTexture2 = nullptr;
 SDL_Event e;
 bool quit = false;
 
@@ -62,9 +64,9 @@ bool Init()
 bool LoadMedia()
 {
 	
-	//gTexture = LoadTexture("data/flower.bmp");
-	gTexture = LoadTexture("data/egg.jpg");
-	if (!gTexture)
+	gTexture1 = LoadTexture("data/flower.bmp");
+	gTexture2 = LoadTexture("data/egg.jpg");
+	if (!gTexture1 || !gTexture2)
 	{
 		LOG_ERROR("Could not load media! SDL error: %s", SDL_GetError());
 		return false;
@@ -98,9 +100,12 @@ SDL_Texture* LoadTexture(std::string path)
 
 void Close()
 {
-	SDL_DestroyTexture(gTexture);
-	gTexture = nullptr;
-
+	SDL_DestroyTexture(gTexture1);
+	gTexture1 = nullptr;
+	
+	SDL_DestroyTexture(gTexture2);
+	gTexture2 = nullptr;
+	
 	SDL_DestroyRenderer(gRenderer);
 	gRenderer = nullptr;
 
@@ -126,13 +131,15 @@ int main(int argc, char* args[])
 		return false;
 	}
 
+	
 	int posX, posY, width, height;	
 	
-	SDL_QueryTexture(gTexture, NULL, NULL, &width, &height);
+	SDL_QueryTexture(gTexture1, NULL, NULL, &width, &height);
 	posX = 0; //(SCREEN_WIDTH - width) / 2;
 	posY = 0; //(SCREEN_HEIGHT - height) / 2;
 
 	SDL_Rect stretchedRect = { 0, 0, width/4, height/4 };
+	
 
 	while (!quit)
 	{
@@ -184,35 +191,25 @@ int main(int argc, char* args[])
 
 		}
 
-		SDL_Rect tmp = { posX, posY, width, height };
+		
 		
 		// Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderClear(gRenderer);
+		SDL_RenderClear(gRenderer);		
 
 		// Render texture to screen
-		SDL_RenderCopy(gRenderer, gTexture, NULL, &tmp);
+		SDL_Rect topRightViewport = { 0, 0, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3};
+		SDL_Rect topLeftViewport = { SCREEN_WIDTH * 2/3, 0, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3 };
+		SDL_Rect bottomViewport = { 0, SCREEN_HEIGHT / 3, SCREEN_WIDTH, SCREEN_HEIGHT * 2/3 };
+		
+		SDL_RenderSetViewport(gRenderer, &topRightViewport);
+		SDL_RenderCopy(gRenderer, gTexture1, NULL, NULL);
 
-		// Render red filled quad
-		SDL_Rect fillRect = {SCREEN_WIDTH * 7/16, SCREEN_HEIGHT * 7/16, SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8};
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
-		SDL_RenderFillRect(gRenderer, &fillRect);
-
-		// Render green outlineed quad
-		SDL_Rect outlineRect = {SCREEN_WIDTH * 3/8, SCREEN_HEIGHT * 3/8, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4};
-		SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
-		SDL_RenderDrawRect(gRenderer, &outlineRect);
-
-		// Draw blue horizontal line
-		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0xFF, 0xFF);
-		SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-
-		// Draw vertical line of yellow dots
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
-		for (int i = 0; i < SCREEN_HEIGHT; i += 4)
-		{ 
-			SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
-		}
+		SDL_RenderSetViewport(gRenderer, &topLeftViewport);
+		SDL_RenderCopy(gRenderer, gTexture2, NULL, NULL);
+		
+		SDL_RenderSetViewport(gRenderer, &bottomViewport);
+		DrawPrimitives();
 
 		// Update screen
 		SDL_RenderPresent(gRenderer);
@@ -222,3 +219,28 @@ int main(int argc, char* args[])
 
 	return 0;
 }
+
+void DrawPrimitives()
+{
+	// Render red filled quad
+	SDL_Rect fillRect = { SCREEN_WIDTH * 7 / 16, SCREEN_HEIGHT * 7 / 16, SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 };
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0, 0, 0xFF);
+	SDL_RenderFillRect(gRenderer, &fillRect);
+
+	// Render green outlineed quad
+	SDL_Rect outlineRect = { SCREEN_WIDTH * 3 / 8, SCREEN_HEIGHT * 3 / 8, SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4 };
+	SDL_SetRenderDrawColor(gRenderer, 0, 0xFF, 0, 0xFF);
+	SDL_RenderDrawRect(gRenderer, &outlineRect);
+
+	// Draw blue horizontal line
+	SDL_SetRenderDrawColor(gRenderer, 0, 0, 0xFF, 0xFF);
+	SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+
+	// Draw vertical line of yellow dots
+	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0, 0xFF);
+	for (int i = 0; i < SCREEN_HEIGHT; i += 4)
+	{
+		SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
+	}
+}
+
