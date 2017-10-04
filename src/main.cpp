@@ -1,8 +1,6 @@
-#include <SDL.h>
-#include <SDL_Image.h>
-#include <stdio.h>
+#include "stdafx.h"
 
-#include "Utils/Logger.h"
+#include "Texture.h"
 
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
@@ -15,8 +13,8 @@ void DrawPrimitives();
 
 SDL_Window *gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
-SDL_Texture* gTexture1 = nullptr;
-SDL_Texture* gTexture2 = nullptr;
+Texture gTexture1;
+Texture gTexture2;
 SDL_Event e;
 bool quit = false;
 
@@ -63,16 +61,11 @@ bool Init()
 
 bool LoadMedia()
 {
+	bool result = true;
+	result &= gTexture1.LoadFromFile(gRenderer, "data/flower.bmp");
+	result &= gTexture2.LoadFromFile(gRenderer, "data/foo.png");
 	
-	gTexture1 = LoadTexture("data/flower.bmp");
-	gTexture2 = LoadTexture("data/egg.jpg");
-	if (!gTexture1 || !gTexture2)
-	{
-		LOG_ERROR("Could not load media! SDL error: %s", SDL_GetError());
-		return false;
-	}
-
-	return true;
+	return result;
 }
 
 SDL_Texture* LoadTexture(std::string path)
@@ -99,13 +92,10 @@ SDL_Texture* LoadTexture(std::string path)
 }
 
 void Close()
-{
-	SDL_DestroyTexture(gTexture1);
-	gTexture1 = nullptr;
-	
-	SDL_DestroyTexture(gTexture2);
-	gTexture2 = nullptr;
-	
+{	
+	gTexture1.Free();
+	gTexture2.Free();
+
 	SDL_DestroyRenderer(gRenderer);
 	gRenderer = nullptr;
 
@@ -134,12 +124,9 @@ int main(int argc, char* args[])
 	
 	int posX, posY, width, height;	
 	
-	SDL_QueryTexture(gTexture1, NULL, NULL, &width, &height);
-	posX = 0; //(SCREEN_WIDTH - width) / 2;
-	posY = 0; //(SCREEN_HEIGHT - height) / 2;
-
-	SDL_Rect stretchedRect = { 0, 0, width/4, height/4 };
 	
+	posX = 0; //(SCREEN_WIDTH - width) / 2;
+	posY = 0; //(SCREEN_HEIGHT - height) / 2;	
 
 	while (!quit)
 	{
@@ -202,13 +189,8 @@ int main(int argc, char* args[])
 		SDL_Rect topLeftViewport = { SCREEN_WIDTH * 2/3, 0, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3 };
 		SDL_Rect bottomViewport = { 0, SCREEN_HEIGHT / 3, SCREEN_WIDTH, SCREEN_HEIGHT * 2/3 };
 		
-		SDL_RenderSetViewport(gRenderer, &topRightViewport);
-		SDL_RenderCopy(gRenderer, gTexture1, NULL, NULL);
-
-		SDL_RenderSetViewport(gRenderer, &topLeftViewport);
-		SDL_RenderCopy(gRenderer, gTexture2, NULL, NULL);
-		
-		SDL_RenderSetViewport(gRenderer, &bottomViewport);
+		gTexture1.Render(gRenderer, 0, 0);
+		gTexture2.Render(gRenderer, 100, 100);
 		DrawPrimitives();
 
 		// Update screen
