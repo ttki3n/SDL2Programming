@@ -15,8 +15,11 @@ SDL_Window *gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 Texture gTexture1;
 Texture gTexture2;
+SDL_Rect gSpriteClips[4];
+Texture gSpriteSheetTexture;
 SDL_Event e;
 bool quit = false;
+
 
 
 bool Init()
@@ -54,7 +57,29 @@ bool Init()
 		return false;
 	}
 
-	
+	//Set top left sprite
+	gSpriteClips[0].x = 0;
+	gSpriteClips[0].y = 0;
+	gSpriteClips[0].w = 100;
+	gSpriteClips[0].h = 100;
+
+	//Set top right sprite
+	gSpriteClips[1].x = 100;
+	gSpriteClips[1].y = 0;
+	gSpriteClips[1].w = 100;
+	gSpriteClips[1].h = 100;
+
+	//Set bottom left sprite
+	gSpriteClips[2].x = 0;
+	gSpriteClips[2].y = 100;
+	gSpriteClips[2].w = 100;
+	gSpriteClips[2].h = 100;
+
+	//Set bottom right sprite
+	gSpriteClips[3].x = 100;
+	gSpriteClips[3].y = 100;
+	gSpriteClips[3].w = 100;
+	gSpriteClips[3].h = 100;
 
 	return true;
 }
@@ -64,7 +89,7 @@ bool LoadMedia()
 	bool result = true;
 	result &= gTexture1.LoadFromFile(gRenderer, "data/flower.bmp");
 	result &= gTexture2.LoadFromFile(gRenderer, "data/foo.png");
-	
+	result &= gSpriteSheetTexture.LoadFromFile(gRenderer, "data/sprites.png");
 	return result;
 }
 
@@ -95,6 +120,7 @@ void Close()
 {	
 	gTexture1.Free();
 	gTexture2.Free();
+	gSpriteSheetTexture.Free();
 
 	SDL_DestroyRenderer(gRenderer);
 	gRenderer = nullptr;
@@ -189,8 +215,21 @@ int main(int argc, char* args[])
 		SDL_Rect topLeftViewport = { SCREEN_WIDTH * 2/3, 0, SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3 };
 		SDL_Rect bottomViewport = { 0, SCREEN_HEIGHT / 3, SCREEN_WIDTH, SCREEN_HEIGHT * 2/3 };
 		
-		gTexture1.Render(gRenderer, 0, 0);
-		gTexture2.Render(gRenderer, 100, 100);
+		//gTexture1.Render(gRenderer, 0, 0);
+		//gTexture2.Render(gRenderer, 100, 100);
+		
+		//Render top left sprite
+		gSpriteSheetTexture.Render(gRenderer, 0, 0, &gSpriteClips[0]);
+
+		//Render top right sprite
+		gSpriteSheetTexture.Render(gRenderer,SCREEN_WIDTH - gSpriteClips[1].w, 0, &gSpriteClips[1]);
+
+		//Render bottom left sprite
+		gSpriteSheetTexture.Render(gRenderer, 0, SCREEN_HEIGHT - gSpriteClips[2].h, &gSpriteClips[2]);
+
+		//Render bottom right sprite
+		gSpriteSheetTexture.Render(gRenderer, SCREEN_WIDTH - gSpriteClips[3].w, SCREEN_HEIGHT - gSpriteClips[3].h, &gSpriteClips[3]);
+
 		DrawPrimitives();
 
 		// Update screen

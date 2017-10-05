@@ -9,7 +9,7 @@ public:
 	bool LoadFromFile(SDL_Renderer* renderer, std::string path);
 	void Free();
 
-	void Render(SDL_Renderer* renderer, int x, int y);
+	void Render(SDL_Renderer* renderer, int x, int y, SDL_Rect* portion = nullptr);
 
 	int GetWidth();
 	int GetHeight();

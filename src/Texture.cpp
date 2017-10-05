@@ -2,8 +2,6 @@
 
 #include "Texture.h"
 
-
-
 Texture::Texture()
 {
 }
@@ -57,10 +55,19 @@ void Texture::Free()
 	}
 }
 
-void Texture::Render(SDL_Renderer* renderer, int x, int y)
+void Texture::Render(SDL_Renderer* renderer, int x, int y, SDL_Rect* portion)
 {
+	// Set rendering space
 	SDL_Rect renderQuad = { x, y, m_width, m_height };
-	SDL_RenderCopy(renderer, m_texture, NULL, &renderQuad);
+
+	// Set portion rendering
+	if (portion != nullptr)
+	{
+		renderQuad.w = portion->w;
+		renderQuad.h = portion->h;
+	}
+
+	SDL_RenderCopy(renderer, m_texture, portion, &renderQuad);
 }
 
 int Texture::GetWidth()
