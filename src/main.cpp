@@ -219,12 +219,14 @@ int main(int argc, char* args[])
 		//gTexture2.Render(gRenderer, 100, 100);
 		
 		//Render top left sprite
+		gSpriteSheetTexture.SetColorMod(255, 255, 255);
 		gSpriteSheetTexture.Render(gRenderer, 0, 0, &gSpriteClips[0]);
 
 		//Render top right sprite
 		gSpriteSheetTexture.Render(gRenderer,SCREEN_WIDTH - gSpriteClips[1].w, 0, &gSpriteClips[1]);
-
+		
 		//Render bottom left sprite
+		gSpriteSheetTexture.SetColorMod(100, 100, 100);
 		gSpriteSheetTexture.Render(gRenderer, 0, SCREEN_HEIGHT - gSpriteClips[2].h, &gSpriteClips[2]);
 
 		//Render bottom right sprite

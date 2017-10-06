@@ -11,6 +11,8 @@ public:
 
 	void Render(SDL_Renderer* renderer, int x, int y, SDL_Rect* portion = nullptr);
 
+	void SetColorMod(Uint8 red, Uint8 green, Uint8 blue);
+
 	int GetWidth();
 	int GetHeight();
 	

@@ -55,6 +55,12 @@ void Texture::Free()
 	}
 }
 
+void Texture::SetColorMod(Uint8 red, Uint8 green, Uint8 blue)
+{
+	// Set color modulation
+	SDL_SetTextureColorMod(m_texture, red, green, blue);
+}
+
 void Texture::Render(SDL_Renderer* renderer, int x, int y, SDL_Rect* portion)
 {
 	// Set rendering space
